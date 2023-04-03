@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Keyboard Synth with Mutable Instruments Rings Sound</title>
+  </head>
+  <body>
+    <h1>Keyboard Synth with Mutable Instruments Rings Sound</h1>
+    <p>Use your computer keyboard to play notes:</p>
+
+    <script>
+      // Define the audio context and variables
+      var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      var buffer = null;
+      var source = null;
+
+      // Load the Mutable Instruments Rings sound file
+      var request = new XMLHttpRequest();
+      request.open('GET', 'mutable-instruments-rings.wav', true);
+      request.responseType = 'arraybuffer';
+      request.onload = function() {
+        audioContext.decodeAudioData(request.response, function(decodedData) {
+          buffer = decodedData;
+        });
+      };
+      request.send();
+
+      // Define the function to play a note
+      function playSynth(frequency) {
+        // Stop any currently playing note
+        if (source) {
+          source.stop();
+          source.disconnect();
+          source = null;
+        }
+
+        // Create a new BufferSource node and connect it to the audio context
+        source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioContext.destination);
+
+        // Set the pitch of the sound using playbackRate
+        var pitch = frequency / 110.0; // The sample is tuned to A=440Hz, so we need to adjust the pitch for other notes
+        source.playbackRate.value = pitch;
+
+        // Start playing the sound
+        source.start();
+      }
+
+      // Define the function to stop the note
+      function stopSynth() {
+        // Stop the BufferSource node
+        if (source) {
+          source.stop();
+          source.disconnect();
+          source = null;
+        }
+      }
+
+      // Map computer keyboard keys to notes
+      window.addEventListener('keydown', function(event) {
+        var key = event.keyCode;
+        switch (key) {
+          case 65: // A
+            playSynth(261.63);
+            break;
+          case 83: // S
+            playSynth(293.66);
+            break;
+          case 68: // D
+            playSynth(329.63);
+            break;
+          case 70: // F
+            playSynth(349.23);
+            break;
+          case 71: // G
+            playSynth(392.00);
+            break;
+          case 72: // H
+            playSynth(440.00);
+            break;
+          case 74: // J
+            playSynth(493.88);
+            break;
+          case 75: // K
+            playSynth(523.25);
+            break;
+        }
+      });
+
+      // Stop the note when the key is released
+      window.addEventListener('keyup', function(event) {
+        var key = event.keyCode;
+        switch (key) {
+          case 65: // A
+          case 83: // S
+          case 68: // D
+          case 70: // F
+          case 71: // G
+          case 72: // H
+          case 74: // J
+          case 75: // K
+            stopSynth();
+            break;
+        }
+      });
+    </script>
+  </body>
+</html>
